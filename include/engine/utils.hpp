@@ -8,6 +8,8 @@
 #include <graphviz/cgraph.h>
 #include <graphviz/gvc.h>
 
+#include "../engine/value.hpp"
+
 
 namespace PlexiStruct::Utils {
     inline auto release_graph_viz_context(GVC_t* context) -> void {
@@ -23,6 +25,11 @@ namespace PlexiStruct::Utils {
     enum class OutputFormat {
         PNG
     };
+
+
+    /**
+     * Graph renderer
+     */
     class Renderer {
         std::string file_name_;
         OutputFormat outputFormat_;
@@ -48,7 +55,56 @@ namespace PlexiStruct::Utils {
         }
     };
 
+    template<typename T>
+    struct Edge {
+        Engine::ScalarValue<T> from;
+        Engine::ScalarValue<T> to;
+
+        auto operator<(const Edge& edge) const -> bool {
+            return from < edge.from;
+        }
+    };
+
+    template<typename T>
+    struct TraceObj {
+        std::set<Engine::ScalarValue<T>> nodes;
+        std::set<Edge<T>> edges;
+    };
+    template<typename T>
     class TraceBuilder {
+
+        Engine::ScalarValue<T> root_;
+        std::set<Engine::ScalarValue<T>> nodes_;
+        std::set<Edge<T>> edges_;
+
+    public:
+        friend Engine::ScalarValue<T>;
+        static auto of(const Engine::ScalarValue<T>& root) -> TraceBuilder<T> {
+            return TraceBuilder<T>{root};
+        }
+
+        auto get_trace() -> TraceObj<T> {
+            build(root_);
+            return TraceObj<T>{
+                .nodes = nodes_,
+                .edges = edges_
+            };
+        };
+
+    private:
+
+        explicit TraceBuilder(const Engine::ScalarValue<T>& root): root_(root) {};
+
+        auto build(const Engine::ScalarValue<T>& root) -> void{
+            if (!nodes_.contains(root)) {
+                nodes_.insert(root);
+                for (const auto& child : root.get_children()) {
+                    edges_.insert({child, root});
+                    build(child);
+                }
+            }
+        }
+
 
     };
 
@@ -66,7 +122,7 @@ namespace PlexiStruct::Utils {
         char box[] = "box";
         char empty[] = "";
         agsafeset(graph.get(), shape, box, empty);
-        Agedge_t* edge = agedge(graph.get(), node_1, node_2, empty, 0);
+        Agedge_t* edge = agedge(graph.get(), node_1, node_2, empty, 1);
         const char* output_filename = "hello_world_graph.png";
         char algo_name[] = "dot";
         gvLayout(GRAPH_VIZ_CONTEXT.get(), graph.get(), algo_name );

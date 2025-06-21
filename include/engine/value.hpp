@@ -38,6 +38,10 @@ namespace PlexiStruct::Engine {
             return os;
         }
 
+        auto get_children() const -> std::set<ScalarValue> {
+            return previous_;
+        }
+
         auto operator <(const ScalarValue& other) const -> bool {
             return value_ < other.value_;
         }
@@ -51,6 +55,7 @@ namespace PlexiStruct::Engine {
             std::set<ScalarValue> children = {*this, other};
             return ScalarValue(value_ - other.value_, children, Operations::SUBTRACT);
         }
+
 
     protected:
         T value_;
