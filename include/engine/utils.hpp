@@ -4,6 +4,7 @@
 
 #ifndef UTILS_HPP
 #define UTILS_HPP
+#include <ostream>
 #include <bits/stdc++.h>
 #include <graphviz/cgraph.h>
 #include <graphviz/gvc.h>
@@ -63,13 +64,22 @@ namespace PlexiStruct::Utils {
         auto operator<(const Edge& edge) const -> bool {
             return from < edge.from;
         }
+
+        friend std::ostream & operator<<(std::ostream &os, const Edge &obj) {
+            return os
+                    << "Edge ( "
+                   << "from: " << obj.from
+                   << " \n to: " << obj.to << ")\n";
+        }
     };
 
     template<typename T>
     struct TraceObj {
         std::set<Engine::ScalarValue<T>> nodes;
         std::set<Edge<T>> edges;
+
     };
+
     template<typename T>
     class TraceBuilder {
 
@@ -108,14 +118,64 @@ namespace PlexiStruct::Utils {
 
     };
 
+
+    template<typename T>
+    class ComputationGraphBuilder {
+        Engine::ScalarValue<T> root_;
+        std::string graph_name_;
+        std::shared_ptr<Agraph_t> graph_ = nullptr;
+        std::vector<Agnode_t*> node_heap_ {};
+    public:
+        explicit ComputationGraphBuilder(const Engine::ScalarValue<T>& root, const std::string& name)
+        :   root_(root), graph_name_(std::move(name)), graph_(agopen(const_cast<char *>(graph_name_.c_str()), Agdirected, nullptr), release_graph) {
+
+        };
+
+        auto build() -> ComputationGraphBuilder<T>& {
+            if (GRAPH_VIZ_CONTEXT == nullptr) {
+                std::cerr << "Fatal ERROR! graph context is null" << std::endl;
+            }
+            std::string temp_name = "temp name";
+            int count = 1;
+            auto name_gen = [temp_name, count]() mutable -> std::string {
+                std::cout << count << std::endl;
+                count += 1;
+                return temp_name + std::to_string(count);
+            };
+
+            const auto [nodes, edges] = TraceBuilder<T>::of(root_).get_trace();
+            for (const auto node : nodes) {
+                // char temp_name[] = "temp name";
+                Agnode_t* temp_node = agnode(graph_.get(), const_cast<char *>(name_gen().c_str()), 1);
+                agsafeset(temp_node, const_cast<char *>("shape"), const_cast<char *>("box"), const_cast<char *>(""));
+                node_heap_.emplace_back(temp_node);
+
+                if (node.get_operations() != Engine::Operations::NO_OPERATION) {
+                    node_heap_.emplace_back(agnode(graph_.get(), const_cast<char *>(name_gen().c_str()), 1));
+                }
+            }
+            char engine[] = "dot";
+            gvLayout(GRAPH_VIZ_CONTEXT.get(), graph_.get(), "dot" );
+            return *this;
+        }
+
+        auto render(const std::string& file_name) const -> int {
+            if (graph_ == nullptr) {
+                std::cerr << "Graph is null" << std::endl;
+                return 0;
+            }
+            const Renderer renderer(file_name);
+            return renderer.with(graph_);
+        }
+    };
     inline auto hello_world_graphs() -> void {
         if (GRAPH_VIZ_CONTEXT == nullptr) {
             std::cerr << "Fatal ERROR! graph context is null" << std::endl;
         }
         std::string name = "hello_world_graphs";
         std::shared_ptr<Agraph_t> graph(agopen(const_cast<char *>(name.c_str()), Agdirected, nullptr), release_graph);
-        char temp_hello[] = "Node 1";
-        char temp_workd[] = "Node 2";
+        char temp_hello[] = "Node 1 says hello";
+        char temp_workd[] = "Node 2 says world";
         Agnode_t* node_1 = agnode(graph.get(), temp_hello, 1);
         Agnode_t* node_2 = agnode(graph.get(), temp_workd, 1);
         char shape[] = "shape";

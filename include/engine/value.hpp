@@ -9,7 +9,7 @@
 namespace PlexiStruct::Engine {
 
     enum class Operations: std::uint8_t {
-        ADD, SUBTRACT, MULTIPLY, DIVIDE
+        ADD, SUBTRACT, MULTIPLY, DIVIDE, NO_OPERATION
     };
 
     inline std::ostream& operator<<(std::ostream& os, const Operations op) {
@@ -18,6 +18,7 @@ namespace PlexiStruct::Engine {
             case Operations::SUBTRACT: return os << "-";
             case Operations::MULTIPLY: return os <<"*";
             case Operations::DIVIDE: return  os << "/";
+            case Operations::NO_OPERATION: return os << "";
 
         }
         return os << "";
@@ -26,7 +27,7 @@ namespace PlexiStruct::Engine {
     template<typename T = float>
     class ScalarValue {
     public:
-        explicit ScalarValue(const T& value, const std::set<ScalarValue>& children = {}, const Operations op = Operations::ADD)
+        explicit ScalarValue(const T& value, const std::set<ScalarValue>& children = {}, const Operations op = Operations::NO_OPERATION)
         : value_(value), previous_(children), op_(op) {}
 
         friend std::ostream & operator<<(std::ostream &os, const ScalarValue &obj) {
@@ -40,6 +41,10 @@ namespace PlexiStruct::Engine {
 
         auto get_children() const -> std::set<ScalarValue> {
             return previous_;
+        }
+
+        auto get_operations() const -> Operations {
+            return op_;
         }
 
         auto operator <(const ScalarValue& other) const -> bool {
