@@ -34,7 +34,7 @@ namespace PlexiStruct::Engine {
              os     << "ScalerValue( Value : " << obj.value_
                     << ", Operation : " << obj.op_
                     << " | Children [ " ;
-            std::ranges::copy(obj.previous_, std::ostream_iterator<ScalarValue>(os, ", "));
+            // std::ranges::copy(obj.previous_, std::ostream_iterator<ScalarValue>(os, ", "));
             os <<" ] )" <<std::endl;
             return os;
         }
@@ -60,6 +60,29 @@ namespace PlexiStruct::Engine {
             std::set<ScalarValue> children = {*this, other};
             return ScalarValue(value_ - other.value_, children, Operations::SUBTRACT);
         }
+
+        struct KeyHasher {
+            auto operator()(const ScalarValue& key) const -> std::size_t {
+                const std::size_t h1 = std::hash<T>()(key.value_);
+                std::size_t h2 { 0 };
+                if (key.get_children().size() > 0) {
+                    const auto& children = key.get_children();
+                    h2 = std::accumulate(std::begin(children), std::end(children), std::size_t{0},
+                        [](const std::size_t& lhs, const ScalarValue& rhs) {
+                            auto h_inner = std::hash<T>()(rhs.value_);
+                            return lhs + h_inner;
+                        });
+                }
+
+                return h1 ^ (h2 << 1);
+            }
+        };
+
+        struct KeyEqual {
+            auto operator()(const ScalarValue& lhs, const ScalarValue& rhs) const -> bool {
+                return lhs.value_ == rhs.value_;
+            }
+        };
 
 
     protected:
