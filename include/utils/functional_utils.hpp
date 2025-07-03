@@ -213,10 +213,9 @@ namespace PlexiStruct::functional {
     };
 
     inline auto gen_expression_list(const ExpPtr& expression) -> std::list<expr_node_item> {
-        std::shared_ptr<IExprVisitor> evaluator = std::make_unique<FlattenedExpresstionVisitor>();
+        std::shared_ptr<FlattenedExpresstionVisitor> evaluator = std::make_shared<FlattenedExpresstionVisitor>();
         expression->accept(*evaluator);
-        using FlatteneExprVisitorPtr = std::shared_ptr<FlattenedExpresstionVisitor>;
-        return  static_cast<FlatteneExprVisitorPtr>(evaluator)->get_expression_list();
+        return evaluator->get_expression_list();
     }
 
     class stack: public std::stack<double> {
