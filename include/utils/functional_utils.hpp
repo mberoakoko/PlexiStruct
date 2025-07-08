@@ -354,6 +354,91 @@ namespace PlexiStruct::graph {
             return edges_of(index_of(vertex));
         }
     };
+
+    namespace search {
+        template<typename T>
+        struct  Node {
+            T state_;
+            std::optional<Node> parent_;
+            double cost_;
+            double heuristic_;
+
+            explicit  Node(const T& state, std::optional<Node> parent): state_(state), parent_(parent), cost_(0), heuristic_(0) {
+            }
+
+            explicit Node(const T& state, const Node& parent, double cost, double heuristic)
+            : state_(state), parent_(parent), cost_(cost), heuristic_(heuristic) {}
+
+            auto operator<(const Node & rhs) const -> bool {
+                auto a_1 = cost_ + rhs.cost_;
+                auto a_2 = cost_ + rhs.heuristic_;
+                return a_1 < a_2;
+            }
+
+            auto operator==(const Node & rhs) const -> bool {
+                auto a_1 = cost_ + rhs.heuristic_;
+                auto a_2 = cost_ + rhs.heuristic_;
+                return a_1 == a_2;
+            }
+        };
+
+        template<typename T>
+        using PredicateFunc = std::function<bool(T)>;
+
+        template<typename T>
+        using SuccesorFunc = std::function<std::vector<T>(T)>;
+
+        template<typename T>
+        auto depth_first_search(const T& initial, PredicateFunc<T> goal_test, SuccesorFunc<T> succesor) -> std::optional<Node<T>> {
+
+            std::stack<Node<T>> fronteer_;
+            fronteer_.push(Node{initial, std::nullopt});
+
+            std::set<T> visited_ {};
+            visited_.insert(initial);
+
+            while (!fronteer_.empty()) {
+                Node<T> current_node = fronteer_.pop();
+                T current_state = current_node.state_;
+                if (goal_test(current_state)) {
+                    return current_node;
+                }
+                for (const auto& child: succesor(current_state)) {
+                    if (!visited_.contains(current_state)) {
+                        fronteer_.push(Node{current_state, child});
+                        visited_.insert(current_state);
+                    }
+                }
+            }
+            return std::nullopt;
+        }
+
+        template<typename T>
+        auto breath_first_search(const T& initial, PredicateFunc<T> goal_test, SuccesorFunc<T> succesor) -> std::optional<Node<T>> {
+
+            std::queue<Node<T>> fronteer_;
+            fronteer_.push(Node<T>{initial, std::nullopt});
+
+            std::set<T> visited_ {};
+            visited_.insert(initial);
+
+            while (!fronteer_.empty()) {
+                Node<T> current_node = fronteer_.pop();;
+                T current_state = current_node.state_;
+                if (goal_test(current_state)) {
+                    return current_state;
+                }
+                for (const auto& child: succesor(current_state)) {
+                    if (!visited_.contains(current_state)) {
+                        fronteer_.push(Node<T>{current_state, child});
+                        visited_.insert(current_state);
+                    }
+                }
+            }
+            return std::nullopt;
+        }
+
+    }
 }
 
 
