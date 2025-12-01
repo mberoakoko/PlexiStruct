@@ -43,9 +43,9 @@ auto test_trace_builder() -> void {
 auto test_graph() -> void {
     using namespace PlexiStruct;
     using namespace PlexiStruct;
-    Engine::ScalarValue x = Engine::ScalarValue(1.0);
-    Engine::ScalarValue y = Engine::ScalarValue(2.0);
-    Engine::ScalarValue z = Engine::ScalarValue(2.0);
+    auto x = Engine::ScalarValue(1.0);
+    auto y = Engine::ScalarValue(2.0);
+    auto z = Engine::ScalarValue(2.0);
     auto result = x + (y - z);
 
     Utils::ComputationGraphBuilder<double> comp_graph(result, "simple_graph");
@@ -53,8 +53,7 @@ auto test_graph() -> void {
         .build()
         .render("../first_computation_graph.png");
 
-
-    render_result+=1;
+    std::cout <<"Result : " << result << std::endl;
 }
 
 auto test_graph_viz_hello_world() -> void {
@@ -66,6 +65,13 @@ auto test_graph_viz_hello_world() -> void {
 int main() {
     // test_graph_viz_hello_world();
     // test_trace_builder();
-    test_graph();
+    auto value_1 { PlexiStruct::Engine::ScalarValue(1) };
+    auto value_2 { PlexiStruct::Engine::ScalarValue(1) };
+    std::cout << value_1 << std::endl;
+    std::cout << value_2 << std::endl;
+
+    auto intermediate = (value_1 + value_2);
+    std::cout << intermediate << std::endl;
+    // std::cout << (value_1 < value_1) ? "True ": "False ";
     return 0;
 }

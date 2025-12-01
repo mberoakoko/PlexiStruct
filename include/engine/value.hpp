@@ -52,6 +52,10 @@ namespace PlexiStruct::Engine {
             return value_ < other.value_;
         }
 
+        auto operator >(const ScalarValue& other) const -> bool {
+            return  value_ > other.value_;
+        }
+
         auto operator+(const ScalarValue<T>& other) -> ScalarValue<T> {
             std::set<ScalarValue> children = {*this, other};
             return ScalarValue(value_ + other.value_, children, Operations::ADD);
