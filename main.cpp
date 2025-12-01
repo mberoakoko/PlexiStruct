@@ -51,7 +51,7 @@ auto test_graph() -> void {
     Utils::ComputationGraphBuilder<double> comp_graph(result, "simple_graph");
     auto render_result  = comp_graph
         .build()
-        .render("first_computation_graph.png");
+        .render("../first_computation_graph.png");
 
 
     render_result+=1;

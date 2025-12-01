@@ -6,6 +6,7 @@
 #define UTILS_HPP
 #include <ostream>
 #include <bits/stdc++.h>
+
 #include <graphviz/cgraph.h>
 #include <graphviz/gvc.h>
 

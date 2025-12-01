@@ -43,6 +43,7 @@ namespace PlexiStruct::Engine {
             return previous_;
         }
 
+        [[nodiscard]]
         auto get_operations() const -> Operations {
             return op_;
         }
@@ -62,6 +63,11 @@ namespace PlexiStruct::Engine {
         }
 
         struct KeyHasher {
+            /**
+             * This function is used to calculate the keys of scalar values
+             * @param key
+             * @return
+             */
             auto operator()(const ScalarValue& key) const -> std::size_t {
                 const std::size_t h1 = std::hash<T>()(key.value_);
                 std::size_t h2 { 0 };
