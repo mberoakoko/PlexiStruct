@@ -19,6 +19,7 @@ message(DIR " ${GRAPHVIZ_INCLUDE_DIR}")
 add_executable(PlexiStruct main.cpp
         include/engine/value.hpp
         include/engine/utils.hpp
+        include/utils/functional_utils.hpp
 )
 
 

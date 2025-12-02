@@ -4,6 +4,7 @@
 
 #ifndef FUNCTIONAL_UTILS_HPP
 #define FUNCTIONAL_UTILS_HPP
+#include <bits/stdc++.h>
 #include <utility>
 
 namespace PlexiStruct::functional {
@@ -41,7 +42,7 @@ namespace PlexiStruct::functional {
     class Number final: public IExpr {
         double num_ { 0 };
     public:
-        explicit Number(double num) : num_(num) {}
+        explicit Number(const double num) : num_(num) {}
 
         static auto make(double num) ->  ExpPtr {
             return std::make_shared<Number>(num);
@@ -49,6 +50,7 @@ namespace PlexiStruct::functional {
 
         ~Number() override = default;
 
+        [[nodiscard]]
         auto get_num() const -> double { return num_; }
 
         auto accept(IExprVisitor &expr_visitor) -> double override {
@@ -59,13 +61,14 @@ namespace PlexiStruct::functional {
 
 
     enum class Operator: std::uint8_t {PLUS, MULTIPLY, DIVIDE, SUBTRACT, UNARYSUBTRACT};
+
     class BinaryExpression final: public IExpr {
         std::shared_ptr<IExpr> left_;
         std::shared_ptr<IExpr> right_;
         Operator op_ { Operator::PLUS };
     public:
         explicit BinaryExpression(const std::shared_ptr<IExpr>& left,const std::shared_ptr<IExpr>& right, const Operator& op = Operator::PLUS)
-        : left_(std::move(left)), right_(std::move(right)), op_(op) {}
+        : left_(left), right_(right), op_(op) {}
 
         ~BinaryExpression() override = default;
 
@@ -73,10 +76,14 @@ namespace PlexiStruct::functional {
             return std::make_shared<BinaryExpression>(left, right, op);
         }
 
+        [[nodiscard]]
         auto get_op() const -> Operator { return op_; }
 
+        [[nodiscard]]
         auto get_right() const -> std::shared_ptr<IExpr> { return right_; }
 
+
+        [[nodiscard]]
         auto get_left() const -> std::shared_ptr<IExpr> { return left_; }
 
         auto accept(IExprVisitor &expr_visitor) -> double override {
@@ -98,8 +105,10 @@ namespace PlexiStruct::functional {
             return std::make_shared<UnaryExpression>(operand, op);
         }
 
+        [[nodiscard]]
         auto get_op() const -> Operator { return op_; }
 
+        [[nodiscard]]
         auto get_operand() const -> std::shared_ptr<IExpr> { return operand_; }
 
         auto accept(IExprVisitor &expr_visitor) -> double override {
@@ -115,7 +124,7 @@ namespace PlexiStruct::functional {
 
         auto accept(const Number &number) -> double override {
             return number.get_num();
-        };
+        }
 
         auto accept(const UnaryExpression &unary_expr) -> double override {
             auto op = unary_expr.get_op();
@@ -135,12 +144,12 @@ namespace PlexiStruct::functional {
 
         auto accept(const BinaryExpression &binary_expr) -> double override {
             auto op = binary_expr.get_op();
-            auto rhs_val = binary_expr.get_right()->accept(*this);
-            auto lhs_val = binary_expr.get_left()->accept(*this);
+            const auto rhs_val = binary_expr.get_right()->accept(*this);
+            const auto lhs_val = binary_expr.get_left()->accept(*this);
             switch (op) {
                 case Operator::PLUS: {
                     return rhs_val + lhs_val;
-                };
+                }
                 case Operator::SUBTRACT: {
                     return rhs_val - lhs_val;
                 }
@@ -261,18 +270,18 @@ namespace PlexiStruct::functional {
 
 
     inline auto test_evaluation() -> void  {
-        ExpPtr exp = Number::make(1);
-        ExpPtr exp2 = Number::make(2);
-        ExpPtr exp3 = Number::make(3);
-        ExpPtr binary_expr = BinaryExpression::make(exp, exp2, Operator::MULTIPLY);
-        ExpPtr binary_expr2 = BinaryExpression::make(binary_expr, exp3, Operator::MULTIPLY);
+        const ExpPtr exp = Number::make(1);
+        const ExpPtr exp2 = Number::make(2);
+        const ExpPtr exp3 = Number::make(3);
+        const ExpPtr binary_expr = BinaryExpression::make(exp, exp2, Operator::MULTIPLY);
+        const ExpPtr binary_expr2 = BinaryExpression::make(binary_expr, exp3, Operator::MULTIPLY);
         std::cout << "Evaluating binary expression "<< std::endl;
         std::cout << evaluate(binary_expr) << std::endl;
         std::cout << "Evaluating binary expression 2 "<< std::endl;
         std::cout << evaluate(binary_expr2) << std::endl;
 
     }
-}
+};
 
 namespace PlexiStruct::graph {
     class Edge {

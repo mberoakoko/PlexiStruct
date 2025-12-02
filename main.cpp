@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "include/utils/functional_utils.hpp"
 #include "include/engine/value.hpp"
 #include "include/engine/utils.hpp"
 auto test_inital_value( ) -> void {
@@ -63,15 +64,6 @@ auto test_graph_viz_hello_world() -> void {
 
 
 int main() {
-    // test_graph_viz_hello_world();
-    // test_trace_builder();
-    auto value_1 { PlexiStruct::Engine::ScalarValue(1) };
-    auto value_2 { PlexiStruct::Engine::ScalarValue(1) };
-    std::cout << value_1 << std::endl;
-    std::cout << value_2 << std::endl;
-
-    auto intermediate = (value_1 + value_2);
-    std::cout << intermediate << std::endl;
-    // std::cout << (value_1 < value_1) ? "True ": "False ";
+    PlexiStruct::functional::test_evaluation();
     return 0;
 }
